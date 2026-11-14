@@ -1,315 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>German Article Trainer</title>
-  <style>
-    :root {
-      color-scheme: light;
-      --bg: #f6f7fb;
-      --panel: #ffffff;
-      --accent: #255ff4;
-      --accent-muted: #c5d4ff;
-      --text: #1f2630;
-      --muted: #5f6b7a;
-      --correct: #1b9c6c;
-      --incorrect: #d94f4f;
-      font-family: "Segoe UI", "Helvetica Neue", system-ui, -apple-system, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: radial-gradient(circle at 20% 20%, #e7edff, transparent 40%), radial-gradient(circle at 80% 0%, #d9f3ff, transparent 40%), var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-    header {
-      padding: 24px;
-      text-align: center;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-    }
-    main {
-      max-width: 960px;
-      margin: 0 auto 64px;
-      padding: 0 20px 40px;
-    }
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    button {
-      border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 10px 24px rgba(37, 95, 244, 0.22);
-      transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
-    }
-    button.secondary {
-      background: var(--panel);
-      color: var(--text);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-      border: 1px solid #e2e8f0;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    button:not(:disabled):hover { transform: translateY(-1px); }
-    button:not(:disabled):active { transform: translateY(0); box-shadow: 0 6px 14px rgba(37, 95, 244, 0.25); }
-    .card {
-      background: var(--panel);
-      border-radius: 16px;
-      padding: 18px 18px 14px;
-      box-shadow: 0 16px 36px rgba(19, 35, 64, 0.12);
-      margin-bottom: 14px;
-      border: 1px solid #e2e8f0;
-    }
-    .prompt {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 6px 10px;
-      align-items: baseline;
-      margin-bottom: 10px;
-    }
-    .noun {
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
-    .translation {
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-    .choices {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    label.choice {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border: 1px solid #d9e2ec;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #f9fbff;
-      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
-    }
-    input[type="radio"] { accent-color: var(--accent); }
-    input[type="radio"]:focus-visible + .dot { outline: 2px solid var(--accent); outline-offset: 2px; }
-    label.choice:hover { border-color: var(--accent); box-shadow: 0 6px 12px rgba(37, 95, 244, 0.12); }
-    .result {
-      margin-top: 10px;
-      font-weight: 600;
-    }
-    .result.correct { color: var(--correct); }
-    .result.incorrect { color: var(--incorrect); }
-    .score {
-      text-align: center;
-      font-weight: 700;
-      margin-top: 10px;
-      color: var(--text);
-    }
-    .status {
-      text-align: center;
-      color: var(--muted);
-      margin: 10px 0 20px;
-    }
-    .error {
-      color: var(--incorrect);
-      text-align: center;
-      font-weight: 700;
-      margin-top: 16px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Guess the German Articles</h1>
-    <p class="status">Randomly choose der / die / das for 10 nouns. Then reveal the answers.</p>
-  </header>
-  <main>
-    <div class="controls">
-      <button id="new-round">New Round</button>
-      <button id="check" disabled>Show answers</button>
-      <button id="clear" class="secondary">Reset choices</button>
-    </div>
-    <div id="score" class="score"></div>
-    <div id="questions"></div>
-    <div id="error" class="error"></div>
-  </main>
-  <script>
-    const DATA_URL = "daten.tsv";
-    const QUESTIONS = 10;
-
-    const questionsEl = document.getElementById("questions");
-    const scoreEl = document.getElementById("score");
-    const errorEl = document.getElementById("error");
-    const checkBtn = document.getElementById("check");
-    const newRoundBtn = document.getElementById("new-round");
-    const clearBtn = document.getElementById("clear");
-
-    let entries = [];
-    let currentSet = [];
-    let hasChecked = false;
-
-    async function loadData() {
-      try {
-        const res = await fetch(DATA_URL);
-        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-        const text = await res.text();
-        entries = parseTSV(text);
-        if (entries.length < QUESTIONS) {
-          throw new Error(`Not enough rows in daten.tsv. Found ${entries.length}, need ${QUESTIONS}.`);
-        }
-        startNewRound();
-      } catch (err) {
-        errorEl.textContent = err.message;
-      }
-    }
-
-    function parseTSV(text) {
-      return text
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(line => line.length > 0)
-        .map(line => line.split("\t"))
-        .filter(parts => parts.length >= 2)
-        .map(([german, english]) => {
-          const tokens = german.trim().split(/\s+/);
-          const article = tokens.shift();
-          const noun = tokens.join(" ");
-          if (!noun) return null;
-          return { article: article.toLowerCase(), noun, english };
-        })
-        .filter(Boolean);
-    }
-
-    function pickRandomQuestions() {
-      const pool = [...entries];
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
-      return pool.slice(0, QUESTIONS);
-    }
-
-    function renderQuestions(list) {
-      const form = document.createElement("form");
-      list.forEach((item, idx) => {
-        const card = document.createElement("section");
-        card.className = "card";
-
-        const prompt = document.createElement("div");
-        prompt.className = "prompt";
-        prompt.innerHTML = `
-          <div class="noun">${item.noun}</div>
-          <div class="translation">${item.english}</div>
-        `;
-
-        const choices = document.createElement("div");
-        choices.className = "choices";
-        ["der", "die", "das"].forEach(article => {
-          const id = `q${idx}-${article}`;
-          const label = document.createElement("label");
-          label.className = "choice";
-          label.htmlFor = id;
-          label.innerHTML = `
-            <input type="radio" name="q${idx}" id="${id}" value="${article}" />
-            <span>${article}</span>
-          `;
-          choices.appendChild(label);
-        });
-
-        const result = document.createElement("div");
-        result.className = "result";
-        result.id = `result-${idx}`;
-        result.hidden = true;
-
-        card.appendChild(prompt);
-        card.appendChild(choices);
-        card.appendChild(result);
-        form.appendChild(card);
-      });
-      form.addEventListener("change", () => updateButtons());
-      questionsEl.innerHTML = "";
-      questionsEl.appendChild(form);
-    }
-
-    function updateButtons() {
-      const chosen = document.querySelectorAll('input[type="radio"]:checked').length;
-      checkBtn.disabled = chosen === 0;
-    }
-
-    function checkAnswers() {
-      const form = questionsEl.querySelector("form");
-      let correct = 0;
-      currentSet.forEach((item, idx) => {
-        const selected = form.querySelector(`input[name="q${idx}"]:checked`);
-        const resultEl = document.getElementById(`result-${idx}`);
-        if (!selected) {
-          resultEl.textContent = `Correct: ${item.article}`;
-          resultEl.className = "result incorrect";
-          resultEl.hidden = false;
-          return;
-        }
-        const isRight = selected.value === item.article;
-        if (isRight) correct++;
-        resultEl.textContent = isRight ? "Correct!" : `Correct: ${item.article}`;
-        resultEl.className = `result ${isRight ? "correct" : "incorrect"}`;
-        resultEl.hidden = false;
-      });
-      hasChecked = true;
-      scoreEl.textContent = `You got ${correct} / ${currentSet.length} right`;
-      checkBtn.disabled = true;
-    }
-
-    function resetChoices() {
-      const form = questionsEl.querySelector("form");
-      form?.reset();
-      document.querySelectorAll(".result").forEach(el => (el.hidden = true));
-      hasChecked = false;
-      scoreEl.textContent = "";
-      checkBtn.disabled = true;
-    }
-
-    function startNewRound() {
-      currentSet = pickRandomQuestions();
-      renderQuestions(currentSet);
-      hasChecked = false;
-      scoreEl.textContent = "";
-      errorEl.textContent = "";
-      checkBtn.disabled = true;
-    }
-
-    checkBtn.addEventListener("click", e => {
-      e.preventDefault();
-      checkAnswers();
-    });
-    newRoundBtn.addEventListener("click", e => {
-      e.preventDefault();
-      startNewRound();
-    });
-    clearBtn.addEventListener("click", e => {
-      e.preventDefault();
-      resetChoices();
-    });
-
-    loadData();
-  </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#235b48" />
+    <title>German Article Trainer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">A little German, every day</p>
+        <h1>Learn the articles.</h1>
+        <p>Build a lasting memory for <span lang="de">der, die, das.</span></p>
+      </header>
+      <section class="dashboard" aria-label="Study overview">
+        <div><strong id="due-count">—</strong><span>reviews due</span></div>
+        <div>
+          <strong id="learning-count">—</strong><span>learning due</span>
+        </div>
+        <div>
+          <strong id="new-count">—</strong><span>new words left today</span>
+        </div>
+      </section>
+      <p id="error" role="alert" hidden></p>
+      <button id="retry" class="secondary" hidden>
+        Refresh / retry loading
+      </button>
+      <section id="welcome" class="card">
+        <p class="eyebrow">Your daily practice</p>
+        <h2>One word at a time.</h2>
+        <p>
+          Review words when they’re due, then meet up to 10 new words a day.
+          Your progress is saved in this browser.
+        </p>
+        <button id="start" disabled>Start studying</button>
+      </section>
+      <section id="study" class="card" hidden aria-label="Current word">
+        <p class="eyebrow" id="word-kind"></p>
+        <h2 id="noun" lang="de" tabindex="-1"></h2>
+        <p id="translation"></p>
+        <form id="answer-form">
+          <fieldset id="answer-fields">
+            <legend>Which article goes with this word?</legend>
+            <div class="choices">
+              <label
+                ><input type="radio" name="article" value="der" /><span
+                  lang="de"
+                  >der</span
+                ></label
+              >
+              <label
+                ><input type="radio" name="article" value="die" /><span
+                  lang="de"
+                  >die</span
+                ></label
+              >
+              <label
+                ><input type="radio" name="article" value="das" /><span
+                  lang="de"
+                  >das</span
+                ></label
+              >
+            </div>
+            <label class="guess"
+              ><input type="checkbox" id="guessed" /> I guessed / couldn’t
+              recall it</label
+            >
+            <div class="actions">
+              <button id="check" type="submit" disabled>Check answer</button
+              ><button id="reveal" class="secondary" type="button">
+                I don’t know</button
+              ><button id="skip" class="text-button" type="button">Skip</button>
+            </div>
+          </fieldset>
+        </form>
+        <div id="feedback" role="status" tabindex="-1" hidden></div>
+        <button id="next" hidden>Next word →</button>
+        <details id="word-progress">
+          <summary>This word’s history</summary>
+          <p id="word-stats"></p>
+        </details>
+      </section>
+      <section id="finished" class="card" hidden>
+        <p class="eyebrow">A good place to pause</p>
+        <h2>You’re caught up.</h2>
+        <p id="next-due"></p>
+        <button id="revisit" class="secondary">Revisit skipped words</button>
+      </section>
+      <p id="session-progress" class="muted" aria-live="polite"></p>
+      <details class="settings">
+        <summary>Progress & backups</summary>
+        <p id="totals"></p>
+        <p>
+          Saved on this device, in this browser. Back up your progress before
+          clearing browser data or moving to another address.
+        </p>
+        <div class="actions">
+          <button id="export" class="secondary" disabled>Export backup</button
+          ><label class="file-button"
+            >Import backup<input
+              id="import"
+              type="file"
+              accept="application/json,.json"
+              disabled /></label
+          ><button id="persist" class="secondary" disabled>Keep storage</button>
+        </div>
+        <p id="storage-status" role="status"></p>
+        <button id="erase" class="text-button danger" disabled>
+          Erase progress…
+        </button>
+      </details>
+      <footer>
+        Due reviews first. Small steps, stronger memories.<br />Article
+        selection includes plural and regional variants.
+      </footer>
+      <noscript
+        >This trainer needs JavaScript and IndexedDB to save your
+        progress.</noscript
+      >
+    </main>
+    <script type="module" src="js/app.js"></script>
+  </body>
 </html>
