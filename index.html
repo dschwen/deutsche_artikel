@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#235b48" />
     <title>German Article Trainer</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Articles" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -13,6 +18,7 @@
         <p class="eyebrow">A little German, every day</p>
         <h1>Learn the articles.</h1>
         <p>Build a lasting memory for <span lang="de">der, die, das.</span></p>
+        <button id="install-app" class="secondary" hidden>Install app</button>
       </header>
       <section class="dashboard" aria-label="Study overview">
         <div><strong id="due-count">—</strong><span>reviews due</span></div>
@@ -111,6 +117,7 @@
           Erase progress…
         </button>
       </details>
+      <p id="offline-status" class="muted" role="status"></p>
       <footer>
         Due reviews first. Small steps, stronger memories.<br />Article
         selection includes plural and regional variants.
@@ -121,5 +128,6 @@
       >
     </main>
     <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/pwa.js"></script>
   </body>
 </html>

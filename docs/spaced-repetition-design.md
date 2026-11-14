@@ -12,9 +12,9 @@ failures bring the item back for relearning. Closing the page must preserve both
 completed reviews and the current unanswered question.
 
 Keep the app static, with no account or backend. IndexedDB stores progress for one
-learner in the current browser. Cross-device synchronization, automatic parameter
-training, service-worker/offline asset caching, and a visual redesign are separate
-projects. IndexedDB persistence alone does not make the app load offline.
+learner in the current browser. Cross-device synchronization, automatic parameter training, and a visual redesign
+are separate projects. Offline asset caching and installation were subsequently
+added with a manifest and versioned service worker; see README.md.
 
 ## Findings in this repository
 

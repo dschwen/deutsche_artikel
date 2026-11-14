@@ -14,3 +14,7 @@ await copyFile(
   "node_modules/@open-spaced-repetition/srs-kit/LICENSE",
   "vendor/srs-kit-LICENSE",
 );
+
+const { generateWorker } = await import("./build-pwa.mjs");
+const { writeFile } = await import("node:fs/promises");
+await writeFile("sw.js", await generateWorker());

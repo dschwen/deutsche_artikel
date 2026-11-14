@@ -2,7 +2,8 @@
 
 A static webapp for learning German articles with FSRS-7 spaced repetition.
 It presents one word at a time, prioritizes due reviews, and introduces up to ten
-new words per study day. Progress is stored in IndexedDB in the current browser.
+new words per study day. Progress is stored in IndexedDB in the current browser. The app can be installed
+and used offline after its first complete online visit.
 
 ## Run locally
 
@@ -17,6 +18,24 @@ CDN is needed: the scheduler browser bundle is checked in under `vendor/`.
 For a durable public address, enable GitHub Pages for this repository's main
 branch/root and use that address consistently. The old HTML preview URL is no
 longer the recommended launch method. Deployment settings have not been changed.
+
+## Install and use offline
+
+Serve the app over HTTPS (or localhost for development). Open it once while
+online and wait for **Ready for offline study**. The service worker caches the
+entire app, scheduler, icons, and vocabulary. Subsequent launches and studying
+work offline, including saving progress and exporting backups.
+
+Use **Install app** when your browser offers it, the browser's install menu, or
+**Share → Add to Home Screen** on iPhone/iPad. The manifest and service worker use
+relative paths so the app also works under `/deutsche_artikel/` on GitHub Pages.
+Installation availability depends on the browser and platform.
+
+New versions download in the background. If an update is ready, close all
+trainer tabs and installed-app windows, then reopen. Existing windows keep their
+current release until closed, avoiding mixed scripts and vocabulary. Updates
+replace only this app's asset caches; IndexedDB progress is preserved. Clearing
+site data can remove both progress and offline files.
 
 ## Study and backups
 
@@ -35,8 +54,7 @@ Use **Progress & backups** to export/import JSON, request persistent storage, or
 erase progress. Import replaces existing progress after confirmation. Your data
 stays on this device, browser profile, and origin (scheme, hostname, and port).
 Clearing site data, private browsing, or changing addresses can lose or separate
-progress. Export backups regularly. No cross-device sync or offline asset cache
-is included.
+progress. Export backups regularly. Cross-device synchronization is not included.
 
 ## Development and checks
 
@@ -52,8 +70,15 @@ npm run test:browser
 Browser tests use installed Google Chrome by default. Set
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use another compatible Chromium executable.
 They start a local HTTP server automatically. `npm run build` regenerates the
-pinned local scheduler bundle and copies dependency licenses. Commit the bundle
-with scheduler changes; scheduler/model/configuration upgrades need an explicit
+pinned local scheduler bundle, copies dependency licenses, and generates `sw.js`
+with a content hash of all offline assets. **Run the build and commit `sw.js` after
+any change to an app asset**, including vocabulary, HTML, scripts, styles, icons,
+or the manifest. `npm test` checks that the offline release is current. The
+service worker's source template and asset list live under `tools/`. Icons are
+checked in; `python3 tools/create-icons.py` regenerates them with Pillow and the
+DejaVu Sans Bold font.
+
+Commit the bundle with scheduler changes; scheduler/model/configuration upgrades need an explicit
 progress migration.
 
 See [the design](docs/spaced-repetition-design.md) for the storage model and
