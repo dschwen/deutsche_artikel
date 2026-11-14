@@ -136,7 +136,7 @@ async function submit(selected) {
       el("guessed").checked,
     );
     const item = feedback.contentSnapshot;
-    el("feedback").className = feedback.rating === 3 ? "" : "again";
+    el("feedback").className = feedback.outcome === "correct" ? "" : "again";
     el("feedback").replaceChildren();
     const title = document.createElement("strong");
     title.lang = "de";
