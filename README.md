@@ -1,5 +1,7 @@
 # German Article Trainer
 
+[Open the trainer](https://dschwen.github.io/deutsche_artikel/).
+
 A static webapp for learning German articles with FSRS-7 spaced repetition.
 It presents one word at a time, prioritizes due reviews, and introduces up to ten
 new words per study day. Progress is stored in IndexedDB in the current browser. The app can be installed
@@ -15,9 +17,10 @@ Open http://localhost:8000. Serve the whole repository; opening `index.html` as 
 `file://` URL does not support the module/data loading flow. No build or runtime
 CDN is needed: the scheduler browser bundle is checked in under `vendor/`.
 
-For a durable public address, enable GitHub Pages for this repository's main
-branch/root and use that address consistently. The old HTML preview URL is no
-longer the recommended launch method. Deployment settings have not been changed.
+The public app is served by GitHub Pages from `main` / repository root. Use the
+Pages link above consistently so your saved progress remains on the same origin.
+The old HTML Preview link redirects there: HTML Preview runs module scripts as
+classic scripts and cannot host this app's service worker.
 
 ## Install and use offline
 

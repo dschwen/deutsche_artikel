@@ -6,6 +6,7 @@ export const ASSETS = [
   "index.html",
   "styles.css",
   "manifest.webmanifest",
+  "js/launch.js",
   "js/app.js",
   "js/pwa.js",
   "js/catalog.js",
