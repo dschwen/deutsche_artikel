@@ -236,7 +236,7 @@ of open transactions. A request succeeding is insufficient: use the transaction
 Show due reviews, due learning items, and remaining new-item allowance before
 starting. During study show the noun/context, three choices, “I guessed,” “I don't
 know,” and Skip. Feedback shows the full article plus noun, accepted variants,
-and next scheduled review. Expose lifetime counts in a small progress view;
+and a short answer result. Repetition times remain in the background. Expose lifetime counts in a small progress view;
 distinguish recognition accuracy from the scheduler's memory estimate.
 
 Open IndexedDB and load/validate the catalog before enabling study. Use

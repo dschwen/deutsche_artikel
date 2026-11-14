@@ -20,7 +20,7 @@ test("actual browser scheduler, reload recovery, feedback and no duplicate gradi
   await expect(page.locator("#noun")).toHaveText("Jahr");
   await page.locator("input[value=das]").check();
   await page.locator("#check").click();
-  await expect(page.locator("#feedback")).toContainText("Correct!");
+  await expect(page.locator("#feedback")).toHaveText("das JahrCorrect.");
   const data = await run(page, async () => {
     const s = await import("/js/storage.js");
     const db = await s.openStorage();
@@ -38,7 +38,7 @@ test("actual browser scheduler, reload recovery, feedback and no duplicate gradi
   await page.locator("#next").click();
   await expect(page.locator("#noun")).toHaveText("Mal");
   await page.locator("#reveal").click();
-  await expect(page.locator("#feedback")).toContainText("Take a moment");
+  await expect(page.locator("#feedback")).toContainText("Answer revealed.");
   expect(errors).toEqual([]);
 });
 test("concurrent tabs and retries commit one exposure and one answer", async ({

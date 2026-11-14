@@ -227,12 +227,6 @@ summary {
   width: 100%;
   cursor: pointer;
 }
-footer {
-  margin-top: 32px;
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.8;
-}
 .muted {
   color: var(--muted);
   font-size: 0.85rem;
@@ -277,9 +271,6 @@ footer {
 }
 #finished .actions {
   margin-top: 24px;
-}
-#next-due {
-  font-weight: 600;
 }
 @media (min-width: 980px) {
   main {
@@ -343,12 +334,6 @@ footer {
     grid-row: 3;
     margin: 0;
     font-size: 0.78rem;
-  }
-  footer {
-    grid-column: 1;
-    grid-row: 4;
-    margin: 0;
-    font-size: 0.75rem;
   }
   .card {
     padding: 28px;

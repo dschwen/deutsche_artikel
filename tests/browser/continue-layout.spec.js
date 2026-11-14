@@ -24,7 +24,7 @@ test("caught-up screen lets the learner add ten new words without reviewing earl
   await page.locator("#start").click();
   await expect(page.locator("#finished")).toBeVisible();
   await page.screenshot({ path: "test-results/caught-up.png", fullPage: true });
-  await expect(page.locator("#next-due")).toContainText("Next review in");
+  await expect(page.locator("#finished")).not.toContainText("Next review");
   await page
     .getByRole("button", { name: "Learn 10 more words", exact: true })
     .click();

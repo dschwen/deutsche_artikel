@@ -57,17 +57,6 @@ async function action(fn) {
     setBusy(false);
   }
 }
-function until(ms) {
-  const minutes = Math.max(1, Math.ceil((ms - Date.now()) / 60000));
-  if (minutes < 60) return `${minutes} min`;
-  if (minutes < 1440) return `${Math.ceil(minutes / 60)} hr`;
-  return `${Math.ceil(minutes / 1440)} days`;
-}
-const when = (ms) =>
-  new Date(ms).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 async function refreshOverview() {
   const state = await getState(db);
   const s = state.summary;
@@ -83,7 +72,7 @@ async function refreshOverview() {
     ),
   ).length;
   el("session-progress").textContent = started
-    ? `${completed} answers this session${completed >= 10 ? " · Daily practice goal reached. Continue if you like." : " · Optional goal: 10"}`
+    ? `${completed} answers this session`
     : "";
   const skipped = state.presentations.some(
     (p) => p.sessionId === sessionId && p.status === "skipped",
@@ -94,12 +83,10 @@ async function refreshOverview() {
     `Learn ${Math.min(10, s.unintroduced)} more words`;
   el("finished-reason").textContent =
     s.newRemaining === 0 && s.unintroduced > 0
-      ? "You’ve used today’s new-word allowance. Keep going with another small set, or take a break until your next review."
+      ? "Take a break or learn another set."
       : skipped
-        ? "You’ve worked through the available words. Revisit your skipped words, or return when the next review is due."
-        : "No more words are due right now. Spacing your reviews helps them stick. Due reviews resume automatically while this page is open.";
-  el("next-due").textContent =
-    `${skipped ? "Some words were skipped. You can revisit them below. " : ""}${Number.isFinite(s.nextDue) ? `Next review in ${until(s.nextDue)} (${when(s.nextDue)}).` : s.unintroduced > 0 ? "Your regular allowance renews tomorrow." : "You’ve met every word in this collection."}`;
+        ? "Revisit your skipped words."
+        : "More reviews will appear automatically.";
   clearTimeout(timer);
   // Refresh at least every minute for day boundaries, due times, and other tabs.
   timer = setTimeout(
@@ -127,12 +114,12 @@ async function nextQuestion() {
     const card = state.cards.find((c) => c.wordId === item.id);
     el("word-kind").textContent =
       card.phase === "new"
-        ? "Meet a word"
+        ? "New word"
         : card.phase === "review"
-          ? "Time to remember"
-          : "A little reinforcement";
+          ? "Review"
+          : "Review";
     el("word-stats").textContent =
-      `Presented ${card.presentationCount} times · ${card.reviewCount} graded · ${card.correctCount} correct · ${card.incorrectCount} incorrect · ${card.revealedCount} revealed · ${card.guessedCount} correct guesses. ${card.lastReviewedAt ? `Last reviewed ${when(card.lastReviewedAt)}.` : "No graded answers yet."}`;
+      `Presented ${card.presentationCount} times · ${card.reviewCount} graded · ${card.correctCount} correct · ${card.incorrectCount} incorrect · ${card.revealedCount} revealed · ${card.guessedCount} correct guesses.`;
     el("noun").focus();
   }
   await refreshOverview();
@@ -155,7 +142,14 @@ async function submit(selected) {
     title.lang = "de";
     title.textContent = `${item.acceptedArticles.join(" / ")} ${item.noun}`;
     const detail = document.createElement("span");
-    detail.textContent = `${feedback.outcome === "correct" ? (feedback.guessed ? "Correct choice, marked as guessed. Let’s reinforce it." : "Correct! Nicely remembered.") : feedback.outcome === "revealed" ? "Take a moment to remember the article." : "Keep practicing — this word will return soon."} Next review: ${when(feedback.postCard.dueAt)}.`;
+    detail.textContent =
+      feedback.outcome === "correct"
+        ? feedback.guessed
+          ? "Correct (guessed)."
+          : "Correct."
+        : feedback.outcome === "revealed"
+          ? "Answer revealed."
+          : "Incorrect.";
     el("feedback").append(title, detail);
     el("feedback").hidden = false;
     el("next").hidden = false;

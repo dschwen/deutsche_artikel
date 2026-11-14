@@ -15,9 +15,7 @@
   <body>
     <main>
       <header>
-        <p class="eyebrow">A little German, every day</p>
-        <h1>Learn the articles.</h1>
-        <p>Build a lasting memory for <span lang="de">der, die, das.</span></p>
+        <h1>German articles</h1>
         <button id="install-app" class="secondary" hidden>Install app</button>
       </header>
       <div class="app-layout">
@@ -36,12 +34,8 @@
             Refresh / retry loading
           </button>
           <section id="welcome" class="card">
-            <p class="eyebrow">Your daily practice</p>
-            <h2>One word at a time.</h2>
-            <p>
-              Review words when they’re due, then meet up to 10 new words a day.
-              Your progress is saved in this browser.
-            </p>
+            <h2>Ready to practice?</h2>
+            <p>10 new words a day. Progress saved on this device.</p>
             <button id="start" disabled>Start studying</button>
           </section>
           <section id="study" class="card" hidden aria-label="Current word">
@@ -52,7 +46,7 @@
             </div>
             <form id="answer-form">
               <fieldset id="answer-fields">
-                <legend>Which article goes with this word?</legend>
+                <legend>Choose an article</legend>
                 <div class="choices">
                   <label
                     ><input type="radio" name="article" value="der" /><span
@@ -74,8 +68,7 @@
                   >
                 </div>
                 <label class="guess"
-                  ><input type="checkbox" id="guessed" /> I guessed / couldn’t
-                  recall it</label
+                  ><input type="checkbox" id="guessed" /> I guessed</label
                 >
                 <div class="actions">
                   <button id="check" type="submit" disabled>Check answer</button
@@ -90,15 +83,13 @@
             <div id="feedback" role="status" tabindex="-1" hidden></div>
             <button id="next" hidden>Next word →</button>
             <details id="word-progress">
-              <summary>This word’s history</summary>
+              <summary>History</summary>
               <p id="word-stats"></p>
             </details>
           </section>
           <section id="finished" class="card" hidden>
-            <p class="eyebrow">A good place to pause</p>
             <h2 id="finished-title" tabindex="-1">You’re caught up.</h2>
             <p id="finished-reason"></p>
-            <p id="next-due"></p>
             <div class="actions">
               <button id="learn-more" hidden>Learn 10 more words</button>
               <button id="check-due" class="secondary">
@@ -115,8 +106,7 @@
           <summary>Progress & backups</summary>
           <p id="totals"></p>
           <p>
-            Saved on this device, in this browser. Back up your progress before
-            clearing browser data or moving to another address.
+            Saved in this browser. Export a backup before clearing site data.
           </p>
           <div class="actions">
             <button id="export" class="secondary" disabled>Export backup</button
@@ -136,10 +126,6 @@
           </button>
         </details>
         <p id="offline-status" class="muted" role="status"></p>
-        <footer>
-          Due reviews first. Small steps, stronger memories.<br />Article
-          selection includes plural and regional variants.
-        </footer>
       </div>
       <noscript
         >This trainer needs JavaScript and IndexedDB to save your

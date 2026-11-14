@@ -49,8 +49,8 @@ resume after reload. New-word limits and skipped words persist across tabs;
 a new study day starts a new session. When “You’re caught up” appears, use
 **Learn 10 more words** to extend today's allowance. You can also revisit skipped
 words or check for due reviews. Extra introductions do not bring future reviews
-forward, and tomorrow’s allowance returns to ten. The next review time is shown
-on the pause screen, and due reviews resume automatically while it stays open. Learning steps are one and ten minutes;
+forward, and tomorrow’s allowance returns to ten. Due reviews resume automatically while the pause screen stays open.
+Review schedules run in the background; individual repetition times are not shown. Learning steps are one and ten minutes;
 longer intervals are calculated by FSRS at a 90% target retention.
 
 The study timezone is fixed at first use, so travel does not reset your daily

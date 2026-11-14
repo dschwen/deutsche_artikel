@@ -64,14 +64,16 @@ for (const prefix of ["/", "/deutsche_artikel/"]) {
     await expect(offline.locator("#noun")).toHaveText("Jahr");
     await offline.locator("input[value=das]").check();
     await offline.locator("#check").click();
-    await expect(offline.locator("#feedback")).toContainText("Correct!");
+    await expect(offline.locator("#feedback")).toContainText("Correct.");
     await offline.reload();
     await expect(offline.locator("#start")).toBeEnabled();
     await expect(offline.locator("#totals")).toContainText("1 graded answers");
     await offline.locator("#start").click();
     await expect(offline.locator("#noun")).toHaveText("Mal");
     await offline.locator("#reveal").click();
-    await expect(offline.locator("#feedback")).toContainText("Take a moment");
+    await expect(offline.locator("#feedback")).toContainText(
+      "Answer revealed.",
+    );
     expect(errors).toEqual([]);
   });
 }
