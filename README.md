@@ -4,7 +4,7 @@
 
 A static webapp for learning German articles with FSRS-7 spaced repetition.
 It presents one word at a time, prioritizes due reviews, and introduces up to ten
-new words per study day. Progress is stored in IndexedDB in the current browser. The app can be installed
+new words per study day by default. Progress is stored in IndexedDB in the current browser. The app can be installed
 and used offline after its first complete online visit.
 
 ## Run locally
@@ -46,7 +46,11 @@ Choose an article and check the answer, or use “I don’t know.” Correct, un
 answers count as remembered; incorrect answers, reveals, and correct guesses
 schedule reinforcement. Skip leaves the schedule unchanged. Unanswered questions
 resume after reload. New-word limits and skipped words persist across tabs;
-a new study day starts a new session. Learning steps are one and ten minutes;
+a new study day starts a new session. When “You’re caught up” appears, use
+**Learn 10 more words** to extend today's allowance. You can also revisit skipped
+words or check for due reviews. Extra introductions do not bring future reviews
+forward, and tomorrow’s allowance returns to ten. The next review time is shown
+on the pause screen, and due reviews resume automatically while it stays open. Learning steps are one and ten minutes;
 longer intervals are calculated by FSRS at a 90% target retention.
 
 The study timezone is fixed at first use, so travel does not reset your daily
@@ -86,3 +90,6 @@ progress migration.
 
 See [the design](docs/spaced-repetition-design.md) for the storage model and
 transaction rules, and [catalog notes](data/README.md) for vocabulary maintenance.
+
+On desktop, the overview and backup controls sit beside the study card to keep
+answering and feedback in view. Mobile keeps the stacked layout.

@@ -51,7 +51,7 @@ Initial policy:
 | Learning / relearning steps | 1 minute, then 10 minutes; graduate after successful completion |
 | Maximum review interval | 365 days initially |
 | Interval fuzz | Disabled initially for reproducible scheduling |
-| New items | At most 10 distinct first presentations per study day |
+| New items | 10 distinct first presentations per study day by default; the learner can explicitly add another set of up to 10 |
 
 Pin the exact library release and configuration in the implementation. Produce a
 browser-compatible local ESM bundle, including its license, so serving the app

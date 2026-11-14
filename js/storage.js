@@ -4,7 +4,13 @@ import {
   reviewCard,
   validateStoredCard,
 } from "./scheduler.js";
-import { selectCard, studyDay, summarize } from "./queue.js";
+import {
+  selectCard,
+  studyDay,
+  summarize,
+  dailyNewLimit,
+  NEW_LIMIT,
+} from "./queue.js";
 const STORES = ["cards", "presentations", "reviews", "meta"];
 const request = (req) =>
   new Promise((resolve, reject) => {
@@ -198,7 +204,13 @@ export async function getState(db, now = Date.now()) {
     const day = studyDay(now, setting(data.meta, "timezone"));
     return {
       ...data,
-      summary: summarize(data.cards, data.presentations, day, now),
+      summary: summarize(
+        data.cards,
+        data.presentations,
+        day,
+        now,
+        dailyNewLimit(setting(data.meta, "extraNewAllowance"), day),
+      ),
     };
   });
 }
@@ -229,6 +241,7 @@ export async function presentNext(db, catalog, now = Date.now()) {
       sessionId,
       day,
       now,
+      dailyNewLimit(setting(data.meta, "extraNewAllowance"), day),
     );
     if (!card) return null;
     if (
@@ -352,6 +365,26 @@ export async function skip(db, id, now = Date.now()) {
     s.meta.put({ key: "lastObservedAt", value: now });
   });
 }
+// An explicit request extends only today's introduction budget. Rechecking the
+// remaining allowance inside this transaction makes concurrent clicks idempotent.
+export async function allowMoreNewWords(db, now = Date.now()) {
+  return transaction(db, "readwrite", async (s) => {
+    const data = await readAll(s);
+    checkClock(data.meta, now);
+    const day = studyDay(now, setting(data.meta, "timezone"));
+    const limit = dailyNewLimit(setting(data.meta, "extraNewAllowance"), day);
+    const summary = summarize(data.cards, data.presentations, day, now, limit);
+    if (summary.newRemaining > 0 || summary.unintroduced === 0) return;
+    s.meta.put({
+      key: "extraNewAllowance",
+      value: {
+        day,
+        count: limit - NEW_LIMIT + Math.min(NEW_LIMIT, summary.unintroduced),
+      },
+    });
+    s.meta.put({ key: "lastObservedAt", value: now });
+  });
+}
 export async function newSession(db) {
   return transaction(db, "readwrite", (s) => {
     s.meta.put({ key: "sessionId", value: uuid() });
@@ -412,6 +445,15 @@ export function validateBackup(data) {
   if (
     setting(data.meta, "lastObservedAt") !== undefined &&
     !date(setting(data.meta, "lastObservedAt"))
+  )
+    fail();
+  const allowance = setting(data.meta, "extraNewAllowance");
+  if (
+    allowance !== undefined &&
+    (!allowance ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(allowance.day) ||
+      !Number.isSafeInteger(allowance.count) ||
+      allowance.count < 0)
   )
     fail();
   const cards = new Map(data.cards.map((c) => [c.wordId, c]));

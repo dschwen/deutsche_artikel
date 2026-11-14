@@ -20,108 +20,127 @@
         <p>Build a lasting memory for <span lang="de">der, die, das.</span></p>
         <button id="install-app" class="secondary" hidden>Install app</button>
       </header>
-      <section class="dashboard" aria-label="Study overview">
-        <div><strong id="due-count">—</strong><span>reviews due</span></div>
-        <div>
-          <strong id="learning-count">—</strong><span>learning due</span>
-        </div>
-        <div>
-          <strong id="new-count">—</strong><span>new words left today</span>
-        </div>
-      </section>
-      <p id="error" role="alert" hidden></p>
-      <button id="retry" class="secondary" hidden>
-        Refresh / retry loading
-      </button>
-      <section id="welcome" class="card">
-        <p class="eyebrow">Your daily practice</p>
-        <h2>One word at a time.</h2>
-        <p>
-          Review words when they’re due, then meet up to 10 new words a day.
-          Your progress is saved in this browser.
-        </p>
-        <button id="start" disabled>Start studying</button>
-      </section>
-      <section id="study" class="card" hidden aria-label="Current word">
-        <p class="eyebrow" id="word-kind"></p>
-        <h2 id="noun" lang="de" tabindex="-1"></h2>
-        <p id="translation"></p>
-        <form id="answer-form">
-          <fieldset id="answer-fields">
-            <legend>Which article goes with this word?</legend>
-            <div class="choices">
-              <label
-                ><input type="radio" name="article" value="der" /><span
-                  lang="de"
-                  >der</span
-                ></label
-              >
-              <label
-                ><input type="radio" name="article" value="die" /><span
-                  lang="de"
-                  >die</span
-                ></label
-              >
-              <label
-                ><input type="radio" name="article" value="das" /><span
-                  lang="de"
-                  >das</span
-                ></label
-              >
+      <div class="app-layout">
+        <section class="dashboard" aria-label="Study overview">
+          <div><strong id="due-count">—</strong><span>reviews due</span></div>
+          <div>
+            <strong id="learning-count">—</strong><span>learning due</span>
+          </div>
+          <div>
+            <strong id="new-count">—</strong><span>new words left today</span>
+          </div>
+        </section>
+        <div class="study-workspace">
+          <p id="error" role="alert" hidden></p>
+          <button id="retry" class="secondary" hidden>
+            Refresh / retry loading
+          </button>
+          <section id="welcome" class="card">
+            <p class="eyebrow">Your daily practice</p>
+            <h2>One word at a time.</h2>
+            <p>
+              Review words when they’re due, then meet up to 10 new words a day.
+              Your progress is saved in this browser.
+            </p>
+            <button id="start" disabled>Start studying</button>
+          </section>
+          <section id="study" class="card" hidden aria-label="Current word">
+            <div class="word-prompt">
+              <p class="eyebrow" id="word-kind"></p>
+              <h2 id="noun" lang="de" tabindex="-1"></h2>
+              <p id="translation"></p>
             </div>
-            <label class="guess"
-              ><input type="checkbox" id="guessed" /> I guessed / couldn’t
-              recall it</label
-            >
+            <form id="answer-form">
+              <fieldset id="answer-fields">
+                <legend>Which article goes with this word?</legend>
+                <div class="choices">
+                  <label
+                    ><input type="radio" name="article" value="der" /><span
+                      lang="de"
+                      >der</span
+                    ></label
+                  >
+                  <label
+                    ><input type="radio" name="article" value="die" /><span
+                      lang="de"
+                      >die</span
+                    ></label
+                  >
+                  <label
+                    ><input type="radio" name="article" value="das" /><span
+                      lang="de"
+                      >das</span
+                    ></label
+                  >
+                </div>
+                <label class="guess"
+                  ><input type="checkbox" id="guessed" /> I guessed / couldn’t
+                  recall it</label
+                >
+                <div class="actions">
+                  <button id="check" type="submit" disabled>Check answer</button
+                  ><button id="reveal" class="secondary" type="button">
+                    I don’t know</button
+                  ><button id="skip" class="text-button" type="button">
+                    Skip
+                  </button>
+                </div>
+              </fieldset>
+            </form>
+            <div id="feedback" role="status" tabindex="-1" hidden></div>
+            <button id="next" hidden>Next word →</button>
+            <details id="word-progress">
+              <summary>This word’s history</summary>
+              <p id="word-stats"></p>
+            </details>
+          </section>
+          <section id="finished" class="card" hidden>
+            <p class="eyebrow">A good place to pause</p>
+            <h2 id="finished-title" tabindex="-1">You’re caught up.</h2>
+            <p id="finished-reason"></p>
+            <p id="next-due"></p>
             <div class="actions">
-              <button id="check" type="submit" disabled>Check answer</button
-              ><button id="reveal" class="secondary" type="button">
-                I don’t know</button
-              ><button id="skip" class="text-button" type="button">Skip</button>
+              <button id="learn-more" hidden>Learn 10 more words</button>
+              <button id="check-due" class="secondary">
+                Check for due reviews
+              </button>
+              <button id="revisit" class="secondary">
+                Revisit skipped words
+              </button>
             </div>
-          </fieldset>
-        </form>
-        <div id="feedback" role="status" tabindex="-1" hidden></div>
-        <button id="next" hidden>Next word →</button>
-        <details id="word-progress">
-          <summary>This word’s history</summary>
-          <p id="word-stats"></p>
-        </details>
-      </section>
-      <section id="finished" class="card" hidden>
-        <p class="eyebrow">A good place to pause</p>
-        <h2>You’re caught up.</h2>
-        <p id="next-due"></p>
-        <button id="revisit" class="secondary">Revisit skipped words</button>
-      </section>
-      <p id="session-progress" class="muted" aria-live="polite"></p>
-      <details class="settings">
-        <summary>Progress & backups</summary>
-        <p id="totals"></p>
-        <p>
-          Saved on this device, in this browser. Back up your progress before
-          clearing browser data or moving to another address.
-        </p>
-        <div class="actions">
-          <button id="export" class="secondary" disabled>Export backup</button
-          ><label class="file-button"
-            >Import backup<input
-              id="import"
-              type="file"
-              accept="application/json,.json"
-              disabled /></label
-          ><button id="persist" class="secondary" disabled>Keep storage</button>
+          </section>
+          <p id="session-progress" class="muted" aria-live="polite"></p>
         </div>
-        <p id="storage-status" role="status"></p>
-        <button id="erase" class="text-button danger" disabled>
-          Erase progress…
-        </button>
-      </details>
-      <p id="offline-status" class="muted" role="status"></p>
-      <footer>
-        Due reviews first. Small steps, stronger memories.<br />Article
-        selection includes plural and regional variants.
-      </footer>
+        <details class="settings">
+          <summary>Progress & backups</summary>
+          <p id="totals"></p>
+          <p>
+            Saved on this device, in this browser. Back up your progress before
+            clearing browser data or moving to another address.
+          </p>
+          <div class="actions">
+            <button id="export" class="secondary" disabled>Export backup</button
+            ><label class="file-button"
+              >Import backup<input
+                id="import"
+                type="file"
+                accept="application/json,.json"
+                disabled /></label
+            ><button id="persist" class="secondary" disabled>
+              Keep storage
+            </button>
+          </div>
+          <p id="storage-status" role="status"></p>
+          <button id="erase" class="text-button danger" disabled>
+            Erase progress…
+          </button>
+        </details>
+        <p id="offline-status" class="muted" role="status"></p>
+        <footer>
+          Due reviews first. Small steps, stronger memories.<br />Article
+          selection includes plural and regional variants.
+        </footer>
+      </div>
       <noscript
         >This trainer needs JavaScript and IndexedDB to save your
         progress.</noscript

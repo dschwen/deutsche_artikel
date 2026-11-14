@@ -7,6 +7,7 @@ import {
   grade,
   skip,
   newSession,
+  allowMoreNewWords,
   exportProgress,
   importProgress,
   validateBackup,
@@ -41,7 +42,8 @@ function setBusy(value) {
   el("answer-fields").disabled = value || !!feedback || !initialized;
   el("next").disabled = value;
   el("start").disabled = value || !initialized;
-  el("revisit").disabled = value;
+  for (const id of ["revisit", "learn-more", "check-due"])
+    el(id).disabled = value || !initialized;
 }
 async function action(fn) {
   if (busy) return;
@@ -54,6 +56,12 @@ async function action(fn) {
   } finally {
     setBusy(false);
   }
+}
+function until(ms) {
+  const minutes = Math.max(1, Math.ceil((ms - Date.now()) / 60000));
+  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 1440) return `${Math.ceil(minutes / 60)} hr`;
+  return `${Math.ceil(minutes / 1440)} days`;
 }
 const when = (ms) =>
   new Date(ms).toLocaleString(undefined, {
@@ -81,8 +89,17 @@ async function refreshOverview() {
     (p) => p.sessionId === sessionId && p.status === "skipped",
   );
   el("revisit").hidden = !skipped;
+  el("learn-more").hidden = s.newRemaining > 0 || s.unintroduced === 0;
+  el("learn-more").textContent =
+    `Learn ${Math.min(10, s.unintroduced)} more words`;
+  el("finished-reason").textContent =
+    s.newRemaining === 0 && s.unintroduced > 0
+      ? "You’ve used today’s new-word allowance. Keep going with another small set, or take a break until your next review."
+      : skipped
+        ? "You’ve worked through the available words. Revisit your skipped words, or return when the next review is due."
+        : "No more words are due right now. Spacing your reviews helps them stick. Due reviews resume automatically while this page is open.";
   el("next-due").textContent =
-    `${skipped ? "Some words were skipped. You can revisit them below. " : ""}${Number.isFinite(s.nextDue) ? `Next review: ${when(s.nextDue)}.` : "Come back tomorrow for more new words."}`;
+    `${skipped ? "Some words were skipped. You can revisit them below. " : ""}${Number.isFinite(s.nextDue) ? `Next review in ${until(s.nextDue)} (${when(s.nextDue)}).` : s.unintroduced > 0 ? "Your regular allowance renews tomorrow." : "You’ve met every word in this collection."}`;
   clearTimeout(timer);
   // Refresh at least every minute for day boundaries, due times, and other tabs.
   timer = setTimeout(
@@ -92,6 +109,7 @@ async function refreshOverview() {
   return state;
 }
 async function nextQuestion() {
+  const wasFinished = !el("finished").hidden;
   current = await presentNext(db, catalog);
   feedback = null;
   el("welcome").hidden = true;
@@ -118,6 +136,7 @@ async function nextQuestion() {
     el("noun").focus();
   }
   await refreshOverview();
+  if (!current && !wasFinished) el("finished-title").focus();
 }
 async function submit(selected) {
   if (!current || feedback) return;
@@ -202,6 +221,13 @@ el("revisit").onclick = () =>
     await newSession(db);
     await nextQuestion();
   });
+el("learn-more").onclick = () =>
+  action(async () => {
+    await allowMoreNewWords(db);
+    notify();
+    await nextQuestion();
+  });
+el("check-due").onclick = () => action(nextQuestion);
 el("retry").onclick = () => location.reload();
 el("export").onclick = () =>
   action(async () => {

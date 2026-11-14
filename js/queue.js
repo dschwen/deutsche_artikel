@@ -9,7 +9,18 @@ export function studyDay(now, timezone) {
   const get = (type) => parts.find((p) => p.type === type).value;
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
-export function selectCard(cards, items, presentations, sessionId, day, now) {
+export function dailyNewLimit(allowance, day) {
+  return NEW_LIMIT + (allowance?.day === day ? allowance.count : 0);
+}
+export function selectCard(
+  cards,
+  items,
+  presentations,
+  sessionId,
+  day,
+  now,
+  newLimit = NEW_LIMIT,
+) {
   const skipped = new Set(
     presentations
       .filter((p) => p.sessionId === sessionId && p.status === "skipped")
@@ -38,7 +49,7 @@ export function selectCard(cards, items, presentations, sessionId, day, now) {
     eligible
       .filter((c) =>
         c.phase === "new"
-          ? c.presentationCount > 0 || introduced < NEW_LIMIT
+          ? c.presentationCount > 0 || introduced < newLimit
           : c.dueAt <= now,
       )
       .sort(
@@ -51,7 +62,13 @@ export function selectCard(cards, items, presentations, sessionId, day, now) {
       )[0] ?? null
   );
 }
-export function summarize(cards, presentations, day, now) {
+export function summarize(
+  cards,
+  presentations,
+  day,
+  now,
+  newLimit = NEW_LIMIT,
+) {
   const active = cards.filter((c) => c.active && c.phase !== "suspended");
   return {
     learning: active.filter(
@@ -60,10 +77,11 @@ export function summarize(cards, presentations, day, now) {
     due: active.filter((c) => c.phase === "review" && c.dueAt <= now).length,
     newRemaining: Math.max(
       0,
-      NEW_LIMIT -
+      newLimit -
         presentations.filter((p) => p.studyDay === day && p.isIntroduction)
           .length,
     ),
+    unintroduced: active.filter((c) => c.firstPresentedAt === null).length,
     nextDue: Math.min(
       ...active.filter((c) => c.dueAt > now).map((c) => c.dueAt),
     ),
